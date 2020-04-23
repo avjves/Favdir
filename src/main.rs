@@ -19,7 +19,7 @@ fn main()  {//  -> Result<(), Box<dyn std::error::Error>> {
 //        // Delete a favorite
 //        "d" => delete_favorite(&args.identifier),
 //        // List all favorites
-//        "ls" => list_all_favorites(&database),
+        "ls" => list_all_favorites(&database),
         &_ => panic!("Given action is not currently implemented!")
     }
 }
