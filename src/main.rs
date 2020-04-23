@@ -17,7 +17,7 @@ fn main() -> Result<(), std::io::Error> {
 //        // Add a new favorite
         "s" => save_favorite(args.identifier.unwrap(), database),
 //        // Delete a favorite
-//        "d" => delete_favorite(&args.identifier),
+        "d" => delete_favorite(args.identifier.unwrap(), database),
 //        // List all favorites
         "ls" => list_all_favorites(&database),
         &_ => Ok(())
@@ -27,7 +27,6 @@ fn main() -> Result<(), std::io::Error> {
 
 fn load_favorites() -> std::collections::HashMap<String, String> {
     let fav_file = get_fav_file();
-    println!("Favorite file is: {:?}", &fav_file);
     let favorites_as_string = match std::fs::read_to_string(&fav_file) {
         Ok(content) => content,
         Err(error) => String::from("")
@@ -91,6 +90,12 @@ fn get_map_as_string(database: &std::collections::HashMap<String, String>) -> St
         map_as_string.push_str("\n");
     }
     return map_as_string;
+}
+
+fn delete_favorite(identifier: String, mut database: std::collections::HashMap<String, String>) -> Result<(), std::io::Error> {
+    database.remove(&identifier);
+    save_favorites(database);
+    Ok(())
 }
 
 //fn change_directory(identifier: str) {
