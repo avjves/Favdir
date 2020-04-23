@@ -8,25 +8,25 @@ struct Cli {
 }
 
 
-fn main()  {//  -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), std::io::Error> {
     let args = Cli::from_args();
-    let database = load_favorites();
-    match args.action.as_str() {
+    let mut database = load_favorites();
+    let er = match args.action.as_str() {
 //        // Change the current directory to saved favorite
 //        "cd" => change_directory(&args.identifier),
 //        // Add a new favorite
-//        "s" => save_favorite(&args.identifier),
+        "s" => save_favorite(args.identifier.unwrap(), database),
 //        // Delete a favorite
 //        "d" => delete_favorite(&args.identifier),
 //        // List all favorites
         "ls" => list_all_favorites(&database),
-        &_ => panic!("Given action is not currently implemented!")
-    }
+        &_ => Ok(())
+    };
+    Ok(())
 }
 
 fn load_favorites() -> std::collections::HashMap<String, String> {
-    let mut fav_file = get_home_dir();
-    fav_file.push(".favs");
+    let fav_file = get_fav_file();
     println!("Favorite file is: {:?}", &fav_file);
     let favorites_as_string = match std::fs::read_to_string(&fav_file) {
         Ok(content) => content,
@@ -51,18 +51,46 @@ fn get_split_value(value: Option<&str>) -> String{
     return out;
 }
 
-fn get_home_dir() -> std::path::PathBuf {
-    let home_dir = match home_dir() {
+fn get_fav_file() -> std::path::PathBuf {
+    let mut fav_file = match home_dir() {
         Some(path) => path, 
         None => panic!("Could not get current user's home directory!")
     };
-    return home_dir;
+    fav_file.push(".favs");
+    return fav_file;
 }
 
-fn list_all_favorites(database: &std::collections::HashMap<String, String>) {
+fn list_all_favorites(database: &std::collections::HashMap<String, String>) -> Result<(), std::io::Error>{
     for (k, v) in database.iter() {
         println!("{}: {}", k, v);
     }
+    Ok(())
+}
+
+fn save_favorite(identifier: String, mut database: std::collections::HashMap<String, String>) -> Result<(), std::io::Error>{
+    let current_dir = std::env::current_dir()?;
+    println!("Current_dir : {:?}", current_dir);
+    database.insert(identifier, current_dir.display().to_string());
+    save_favorites(database);
+    Ok(())
+}
+
+fn save_favorites(database: std::collections::HashMap<String, String>) -> Result<(), std::io::Error> {
+    let fav_file = get_fav_file();
+    let map_as_string = get_map_as_string(&database);
+    std::fs::write(fav_file, map_as_string);
+    Ok(())
+}
+
+fn get_map_as_string(database: &std::collections::HashMap<String, String>) -> String {
+    let mut map_as_string = String::from("");
+    for (k, v) in database.iter() {
+        map_as_string.push_str(&k.to_owned());
+        map_as_string.push_str(",");
+        map_as_string.push_str(&v.to_owned());
+        map_as_string.push_str("\n");
+    }
+    return map_as_string;
 }
 
 //fn change_directory(identifier: str) {
