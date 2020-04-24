@@ -12,13 +12,13 @@ fn main() -> Result<(), std::io::Error> {
     let args = Cli::from_args();
     let mut database = load_favorites();
     let er = match args.action.as_str() {
-//        // Change the current directory to saved favorite
-//        "cd" => change_directory(&args.identifier),
-//        // Add a new favorite
+        // Change the current directory to saved favorite
+        "cd" => change_directory(args.identifier.unwrap(), database),
+        // Add a new favorite
         "s" => save_favorite(args.identifier.unwrap(), database),
-//        // Delete a favorite
+        // Delete a favorite
         "d" => delete_favorite(args.identifier.unwrap(), database),
-//        // List all favorites
+        // List all favorites
         "ls" => list_all_favorites(&database),
         &_ => Ok(())
     };
@@ -55,20 +55,21 @@ fn get_fav_file() -> std::path::PathBuf {
         Some(path) => path, 
         None => panic!("Could not get current user's home directory!")
     };
-    fav_file.push(".favs");
+    fav_file.push(".fav");
+    fav_file.push("favs");
     return fav_file;
 }
 
 fn list_all_favorites(database: &std::collections::HashMap<String, String>) -> Result<(), std::io::Error>{
     for (k, v) in database.iter() {
-        println!("{}: {}", k, v);
+        eprintln!("{}: {}", k, v);
     }
     Ok(())
 }
 
 fn save_favorite(identifier: String, mut database: std::collections::HashMap<String, String>) -> Result<(), std::io::Error>{
     let current_dir = std::env::current_dir()?;
-    println!("Current_dir : {:?}", current_dir);
+    eprintln!("Current_dir : {:?}", current_dir);
     database.insert(identifier, current_dir.display().to_string());
     save_favorites(database);
     Ok(())
@@ -98,6 +99,11 @@ fn delete_favorite(identifier: String, mut database: std::collections::HashMap<S
     Ok(())
 }
 
-//fn change_directory(identifier: str) {
-//   
-//}
+fn change_directory(identifier: String, database: std::collections::HashMap<String, String>) -> Result<(), std::io::Error> {
+    let favorite_path = match database.get(&identifier) {
+        Some(path) => path,
+        None => panic!("could not find favorite with given name.")
+    };
+    println!("{}", favorite_path);
+    Ok(())
+}
