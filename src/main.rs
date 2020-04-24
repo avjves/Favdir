@@ -69,7 +69,6 @@ fn list_all_favorites(database: &std::collections::HashMap<String, String>) -> R
 
 fn save_favorite(identifier: String, mut database: std::collections::HashMap<String, String>) -> Result<(), std::io::Error>{
     let current_dir = std::env::current_dir()?;
-    eprintln!("Current_dir : {:?}", current_dir);
     database.insert(identifier, current_dir.display().to_string());
     save_favorites(database);
     Ok(())
